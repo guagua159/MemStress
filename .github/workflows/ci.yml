@@ -6,6 +6,15 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      force_matrix:
+        description: '强制跑 63 格故障注入矩阵（即使改动看起来与检测力无关）'
+        type: boolean
+        default: false
+  # 每周一 03:00 UTC 全量跑一次。路径过滤难免有判断不到的情况，
+  # 定时兜底保证检测力至少每周被完整校验一次。
+  schedule:
+    - cron: '0 3 * * 1'
 
 jobs:
   build-and-selftest:
@@ -67,8 +76,39 @@ jobs:
             exit 1
           fi
 
-      # 63 格矩阵约 6 分钟，是检测力回归的主体
+      # 矩阵校验的是「7 种模式 × 9 种故障能否检出」——检测力的回归，约 2.3 分钟。
+      # 只在可能改变这个结论的改动上跑；文档、界面、外部工具、报告排版跑它没有信息量。
+      # 判断不出结果时一律保守全跑：宁可多花 2 分钟，也不能让一次真实回归
+      # 因为过滤逻辑的漏洞被静默放过。
+      - name: 判断是否需要跑故障注入矩阵
+        id: matrix-gate
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.sha }}
+          FORCE: ${{ inputs.force_matrix || 'false' }}
+        run: |
+          set -u
+          out=$(bash scripts/should-run-matrix.sh)
+          echo "$out"
+          run=$(echo "$out" | grep -oP '^run=\K(true|false)' | head -1)
+          reason=$(echo "$out" | grep -oP '^reason=\K.*' | head -1)
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "### 故障注入矩阵：$([ "$run" = "true" ] && echo 执行 || echo 跳过)" >> "$GITHUB_STEP_SUMMARY"
+          echo "$reason" >> "$GITHUB_STEP_SUMMARY"
+
       - name: 63 格故障注入矩阵
+        if: steps.matrix-gate.outputs.run == 'true'
         shell: bash
         run: bash scripts/matrix-test.sh
+
+      # 跳过时显式留痕：跳过不等于通过，不能让它看起来像跑过了。
+      - name: 矩阵已跳过（不代表通过）
+        if: steps.matrix-gate.outputs.run != 'true'
+        shell: bash
+        run: |
+          echo "::notice::本次未运行 63 格故障注入矩阵——改动不涉及检测力。"
+          echo "这不等于「矩阵通过」：检测力在本提交上未经校验。"
+          echo "需要校验时在 Actions 页手动触发并勾选 force_matrix。"
 
