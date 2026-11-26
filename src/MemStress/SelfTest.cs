@@ -132,6 +132,6 @@ public static partial class SelfTest
     /// <summary>
     /// 外部工具编排自检：用系统自带的一个小工具当被测对象，验证
     /// 「拉起子进程 → 逐行捕获 stdout/stderr → 写日志文件 → 归档工具自有日志 → 结果落 JSONL」整条链路。
-    /// 真实工具（y-cruncher/TM5）未安装时也能验证这段代码不会在用户机器上炸。
+    /// 真实工具（y-cruncher）未安装时也能验证这段代码不会在用户机器上炸。
     /// </summary>
 }

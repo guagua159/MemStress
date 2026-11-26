@@ -4,7 +4,7 @@ using System.Runtime.Intrinsics;
 namespace MemStress.Core;
 
 /// <summary>
-/// 压测引擎。每块内存常驻不释放（对应 TM5 的 RefreshStable 思路：不换页才测得准），
+/// 压测引擎。每块内存常驻不释放（不换页才测得准），
 /// worker 线程按块编号交错分片，块内按模式顺序跑，任何不一致都进错误队列。
 /// </summary>
 public sealed unsafe partial class StressEngine : IDisposable

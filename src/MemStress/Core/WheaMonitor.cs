@@ -7,7 +7,7 @@ namespace MemStress.Core;
 /// WHEA 监控。业界共识：压测零错误但有 WHEA-Logger 事件，系统仍然判为不稳定。
 /// 事件语义：17 = 已纠正的硬件错误，最常见于 PCIe Root Port；47 = 已纠正的内存/机器检查
 /// （Component: Memory，DIMM 定位藏在 CPER 结构里）；18/46 是不可纠正版本。
-/// 这是 TM5 类工具最常被漏掉的一环。
+/// 这是纯内存校验类工具最常被漏掉的一环。
 /// 实现方式：把查询脚本写到临时 .ps1 再调用，避免命令行里嵌引号被转义吃掉（wevtutil 的 /q 就栽在这里）。
 /// </summary>
 public sealed class WheaMonitor : IDisposable

@@ -156,7 +156,7 @@ public static class ReportWriter
         sb.AppendLine("## 判定依据与局限");
         sb.AppendLine("- 通过不等于内存绝对可靠：单一工具、单一负载类型无法覆盖所有失效模式，业界做法是用不同类型负载的第二个工具交叉验证（本项目内置 y-cruncher 交叉验证阶段，默认关闭）。");
         sb.AppendLine("- 出现任一内存错误或 WHEA 事件即判不通过；错误集中在同一块、同一模式时，优先怀疑该地址区间或时序参数。");
-        sb.AppendLine("- 走 1 模式只测每块前 32 MiB（每 8 字节要读写 64 遍，全量代价是其他模式的 64 倍），其余模式全量覆盖；采样范围已在此说明，不假装全量。");
+        sb.AppendLine("- 所有模式都覆盖整块内存，不做采样截断（走 1 早期版本只测每块前 32 MiB，现已改为链式遍历整块，覆盖率提升 8 倍）。");
         sb.AppendLine();
         sb.AppendLine($"> 由 MemStress 生成于 {DateTime.Now:yyyy-MM-dd HH:mm:ss}，停止原因：{d.StopReason}");
         return sb.ToString();

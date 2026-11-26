@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace MemStress.Core;
 
-/// <summary>单条内存错误。字段与 TM5 的报错信息对齐：轮次、子测试、块、偏移、期望/实际。</summary>
+/// <summary>单条内存错误。字段与结构化报错所需对齐：轮次、子测试、块、偏移、期望/实际。</summary>
 public sealed class MemoryError
 {
     // 跨线程可见性说明（曾经的疑虑，分析后不改）：

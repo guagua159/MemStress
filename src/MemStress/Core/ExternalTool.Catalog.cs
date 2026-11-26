@@ -19,7 +19,6 @@ public sealed partial class ExternalTool
 
     /// <summary>
     /// 可执行文件名候选（按优先级）。同一工具在不同发行版里文件名并不一致，
-    /// 例如 TestMem5 的官方发行版就是 <c>TM5.exe</c> 而不是 <c>TestMem5.exe</c>，
     /// 只认一个名字会把用户正确放置的文件判成「未安装」。
     /// </summary>
     public string[] ExeNames { get; init; } = Array.Empty<string>();

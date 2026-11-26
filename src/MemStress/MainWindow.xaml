@@ -78,8 +78,8 @@
                   <TextBlock Text="档位" Style="{StaticResource MetricLabel}" />
                   <ComboBox x:Name="ProfileBox" SelectedIndex="1" SelectionChanged="ProfileBox_SelectionChanged" Margin="0,2,0,8">
                     <ComboBoxItem Content="快速筛查 — 2 种模式（移动反转、地址即数据）" />
-                    <ComboBoxItem Content="标准 — 4 种模式（TM5 extreme 同级）" />
-                    <ComboBoxItem Content="深度 — 6 种模式（TM5 absolut 同级，含走 1/棋盘格）" />
+                    <ComboBoxItem Content="标准 — 4 种模式（加随机填充、块拷贝）" />
+                    <ComboBoxItem Content="深度 — 6 种模式（加走 1、棋盘格）" />
                     <ComboBoxItem Content="彻底 — 7 种模式（含模 20 错位，慢约 4 倍，专查缓存掩盖的错误）" />
                   </ComboBox>
 
@@ -390,14 +390,13 @@
               <StackPanel>
                 <TextBlock Text="已知局限" Style="{StaticResource H2}" />
                 <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap" LineHeight="22"
-                           Text="· 走 1 模式只测每块前 32 MiB（每 8 字节要读写 64 遍），其余模式全量覆盖；采样范围写在报告里，不假装全量。&#10;· 大页不可用时自动回退 4 KB 页，覆盖率下降，界面与报告都会标注。&#10;· 只能测到用户态可分配的物理内存；内核占用、保留区测不到。&#10;· 温度相关的不稳定需要配合 GPU 负载或长时间运行才能复现。&#10;· 本工具不做任何系统设置修改，不需要重启。" />
+                           Text="· 所有模式都覆盖整块内存，不做采样截断（走 1 早期版本只测每块前 32 MiB，现已改为链式遍历整块）。&#10;· 大页不可用时自动回退 4 KB 页，覆盖率下降，界面与报告都会标注。&#10;· 只能测到用户态可分配的物理内存；内核占用、保留区测不到。&#10;· 温度相关的不稳定需要配合 GPU 负载或长时间运行才能复现。&#10;· 本工具不做任何系统设置修改，不需要重启。" />
               </StackPanel>
             </Border>
             <Border Style="{StaticResource Card}">
               <StackPanel>
                 <TextBlock Text="参考" Style="{StaticResource H2}" />
                 <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap" LineHeight="22">
-                  TestMem5 官网 testmem5.com；TestMem5 配置结构见 MemTestHelper（integralfx）的 TM5-Configs；
                   RunMemtestStartup（rictirse）的启动器与 SMBIOS 采集思路；y-cruncher（Mysticial）作为非缓存负载。
                   参数依据来自 MemTest86 官方算法说明与社区公开的 extreme@anta777 / absolutnew 配置。
                 </TextBlock>

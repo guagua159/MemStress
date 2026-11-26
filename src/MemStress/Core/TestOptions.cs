@@ -4,9 +4,9 @@ public enum StressProfile
 {
     /// <summary>快速筛查：移动反转 + 地址即数据。</summary>
     Quick,
-    /// <summary>标准：4 种模式，对应 TM5 extreme 的定位。</summary>
+    /// <summary>标准：4 种模式（加随机填充与块拷贝），日常筛查的默认档。</summary>
     Standard,
-    /// <summary>深度：全部 6 种模式，对应 TM5 absolut 的定位。</summary>
+    /// <summary>深度：全部 6 种模式（加走 1 与棋盘格），覆盖位线与相邻单元耦合。</summary>
     Deep,
     /// <summary>
     /// 彻底：在 6 种模式之上加 Modulo-X。慢约 4 倍，但能查出被缓存/写缓冲掩盖的错误

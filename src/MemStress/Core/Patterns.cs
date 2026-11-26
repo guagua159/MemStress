@@ -12,11 +12,11 @@ public enum PatternKind
 }
 
 /// <summary>
-/// 测试模式的元数据。设计参照 TestMem5 的四类子测试：
-/// RefreshStable（写非常量 pattern 后回读校验，唯一做数据完整性判定）、SimpleTest（通用读写打满内存 I/O）、
-/// MirrorMove / MirrorMove128（把测试块里外翻转、按奇偶条纹多趟搬运，破坏控制器对访问模式的自适应）。
-/// 本项目对应关系：MovingInversion/Checkerboard ≈ SimpleTest，RandomFill ≈ RefreshStable，
-/// AddressAsData 抓地址译码，BlockCopy ≈ MirrorMove。所有模式都在本进程内做完整回读校验。
+/// 测试模式的元数据。按四类故障模型组织：
+/// 数据完整性（写非常量 pattern 后回读校验）、通用读写打满内存 I/O、
+/// 块搬运（把测试块里外翻转、按奇偶条纹多趟搬运，破坏控制器对访问模式的自适应）、
+/// 地址译码。本项目对应关系：MovingInversion/Checkerboard ≈ 通用读写，RandomFill ≈ 数据完整性，
+/// AddressAsData 抓地址译码，BlockCopy ≈ 块搬运。所有模式都在本进程内做完整回读校验。
 /// </summary>
 public static class Patterns
 {
