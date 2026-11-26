@@ -5,7 +5,7 @@ namespace MemStress.Core;
 
 /// <summary>
 /// 自研压测的六个模式内核 + 校验辅助。
-/// 每个模式对应一种经典内存故障模型（出处见 Patterns.cs 注释与 docs/research.md §1）；
+/// 每个模式对应一种经典内存故障模型（出处见 Patterns.cs 注释）；
 /// 线程调度、进度记账、报错去重在 StressEngine.cs，这里只管「怎么读写、怎么校验」。
 /// 加新模式：在 PatternKind 里加枚举值，在这里加一个方法，再到 RunOne 里接上分支。
 /// </summary>

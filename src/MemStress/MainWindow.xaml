@@ -399,7 +399,7 @@
                 <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap" LineHeight="22">
                   TestMem5 官网 testmem5.com；TestMem5 配置结构见 MemTestHelper（integralfx）的 TM5-Configs；
                   RunMemtestStartup（rictirse）的启动器与 SMBIOS 采集思路；y-cruncher（Mysticial）作为非缓存负载。
-                  详细调研记录（含 21 个来源链接、extreme@anta777 与 absolutnew 的实测参数）见项目 docs/research.md。
+                  参数依据来自 MemTest86 官方算法说明与社区公开的 extreme@anta777 / absolutnew 配置。
                 </TextBlock>
               </StackPanel>
             </Border>

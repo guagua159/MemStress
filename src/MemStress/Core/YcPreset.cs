@@ -6,7 +6,7 @@ namespace MemStress.Core;
 
 /// <summary>
 /// y-cruncher 的一键压测预设。
-/// 参数依据（docs/research.md §7）：N63 与 VT3 是社区公认对内存/IMC 最敏感的两个算法，
+/// 参数依据：N63 与 VT3 是社区公认对内存/IMC 最敏感的两个算法，
 /// FFTv4 补足浮点与缓存层次路径；三段时长分别对应快筛 / 确认 / 长驻留。
 /// 算法名取自官方命令行手册 v0.8.6+ 的有效集合，N32/N64/HNT/VST/C17 已废弃。
 /// </summary>

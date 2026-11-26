@@ -10,8 +10,7 @@ WalkingOnes / Checkerboard / ModuloX），可选 y-cruncher 交叉验证，WHEA 
 **尚未做**：多实例分核、SMBIOS 原始表读取、外部工具自动下载。
 
 > **要改代码或接手维护？** 先看 [MAINTENANCE.md](MAINTENANCE.md)——代码地图、「我要改 X 该动哪个文件」速查、改完必跑的验证命令、踩过的坑。
-> **接手待办与路线？** 见 [docs/HANDOFF.md](docs/HANDOFF.md) 与 [docs/handoff-plan.md](docs/handoff-plan.md)。
-> **改完要记一笔？** 按 [docs/CHANGELOG-GUIDE.md](docs/CHANGELOG-GUIDE.md) 的四段式写进 [CHANGELOG.md](CHANGELOG.md)。
+> **改完要记一笔？** 按 [CHANGELOG.md](CHANGELOG.md) 的四段式（症状/根因/改法/验证）写。
 
 ## 许可证
 
@@ -50,18 +49,18 @@ MemStress.exe --wheaselftest
 
 自检退出码：`0` 通过，`2` 失败。
 
-📖 图文说明书：[docs/MemStress-使用说明书.docx](docs/MemStress-使用说明书.docx)（12 章，9 页，含参数表、判读规则、FAQ）
+📖 图文说明书：本地运行 `python scripts/make-manual.py` 生成 `docs/MemStress-使用说明书.docx`（12 章，9 页，含参数表、判读规则、FAQ）。成品不随仓库分发。
 
 ## 界面
 
 | 页签 | 内容 |
 |---|---|
-| 压测 | 档位、内存占用、线程数、块大小、轮数/时长、大页开关；实时指标（时长/吞吐/累计读写/轮次/错误）；错误表格；导出报告 |
+| 压测 | 档位、内存占用、线程数、块大小、轮数/时长、大页开关、交叉验证开关；实时指标（时长/吞吐/累计读写/轮次/错误）；错误表格 |
+| 报告 | 查看报告、打开日志目录 |
 | 运行日志 | 运行过程逐行日志，可清空、可打开日志目录 |
-| 外部工具 | y-cruncher / TestMem5 的发现、指定路径、运行与输出归档 |
+| y-cruncher | 工具发现、指定路径、三档预设运行、输出归档与三态判定 |
 | 方法与局限 | 判读规则、已知局限、参考来源 |
 
-![运行中的界面](docs/screenshot-gui-running.png)
 
 ## 测试模式
 
@@ -215,7 +214,7 @@ MemStress.exe --toolscan
 | 不误杀外部实例 | ✅ 程序外自行启动的 y-cruncher 在停止卡片任务后仍存活 |
 | 关闭窗口带走子进程 | ✅ 子进程不再变孤儿（曾会残留并继续吃内存） |
 | 断网可完整跑完并导出报告 | ✅ 仅用 BCL 与系统自带的 powershell/explorer，无 NuGet 依赖 |
-| `docs/research.md` 结论带来源 | ✅ 6 节 1970 字，21 个链接，未查到的 3 项已明确列出 |
+| 调研结论带来源 | ✅ 6 节 1970 字，21 个链接，未查到的 3 项已明确列出 |
 | 管理员模式下 SMBIOS 原始表 | ✅ 可读，2453 字节，SMBIOS 3.8 |
 
 ## 已知局限
@@ -244,11 +243,8 @@ E:\MemStress
 ├─ scripts\fake-whea.ps1   合成 WHEA 事件，供 --wheaselftest 验证解析链路
 ├─ scripts\make-manual.py  生成说明书 DOCX（成品不入库）
 ├─ .github\workflows\ci.yml 构建 + 七项自检 + 矩阵 + 版本号校验
-├─ docs\research.md        调研记录（6 节，21 个来源）
-├─ docs\HANDOFF.md         交接文档（待办清单 + 一周优化路线 + 踩坑汇总）
-├─ docs\handoff-plan.md    HANDOFF 十项的可执行方案
-├─ docs\audit-2026-11.md   P0-P3 审计与三轮审查结论
-├─ docs\MemStress-使用说明书.docx  图文说明书（由脚本生成，不入库）
 ├─ logs\                   每次测试一个会话目录（不入库）
 └─ tools\                  外部工具投放点（不入库；第三方二进制不随仓库分发）
 ```
+
+`docs\`（说明书、调研记录、截图等）属于本地工作文档，不随仓库分发。

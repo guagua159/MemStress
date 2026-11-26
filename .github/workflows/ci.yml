@@ -70,10 +70,8 @@ jobs:
         shell: bash
         run: bash scripts/matrix-test.sh
 
-      # docx 不入库（决策），因此这里只做静态检查，不比对漂移、也不装 python-docx。
-      # 理由：CI 里为一个文档脚本引入 pip 网络依赖，会让流水线因外部包源波动而红。
+      # docs/ 为本地工作文档，不入库；这里只验证生成脚本语法正确。
       # 真正的手册校验是本地跑 `python scripts/make-manual.py` 后肉眼确认。
-      # 若将来改为提交 docx，应换成「重生成后 git status --short docs/ 必须为空」。
       - name: 说明书脚本语法检查
         run: python -m py_compile scripts/make-manual.py
 

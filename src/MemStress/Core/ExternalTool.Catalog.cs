@@ -219,7 +219,7 @@ public sealed partial class ExternalTool
             // 仅「机器上其他位置」的便利搜索；投放点 tools\ycruncher\ 由 DropInDir 单独负责
             SearchDirs = new[] { @"C:\Tools", @"C:\Program Files", @"C:\y-cruncher" },
             // stress 模式的官方语法：stress [-M:{内存}] [-D:{每项秒数}] [-TL:{总时限}] [算法]
-            // 三个坑（见 docs/research.md §3）：stress 不认 -mt；-o 在 stress 模式无效；
+            // 三个坑（调研记录见本机 docs/research.md §3，不随仓库分发）：stress 不认 -mt；-o 在 stress 模式无效；
             // 输出走 WriteConsoleW，直接重定向只能拿到空文件，官方途径是启动选项 logfile:"..."
             // 实际运行时由 YcPreset 生成带时间戳的 logfile 与 -M/-D/-TL，这里只是兜底默认值。
             DefaultArgs = YcPreset.Standard.BuildArgs("ycruncher-stress.log"),
