@@ -15,11 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # windows-latest 镜像当前已含 .NET SDK 10.0.404，与 global.json 锁定值一致。
-      # 仍显式 setup 一次：镜像滚动时版本会变，显式指定才能保证可复现。
+      # 与 global.json 的 10.0.100 + latestFeature 保持一致：用 .NET 10 的最新补丁，
+      # 不钉死某个小版本。钉死会让「本地能构建、CI 找不到该版本」这类问题反复出现。
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.404'
+          dotnet-version: '10.0.x'
 
       - name: 构建（要求 0 错误 0 警告）
         run: dotnet build src/MemStress/MemStress.csproj -v q --nologo

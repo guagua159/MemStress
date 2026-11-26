@@ -17,7 +17,8 @@
 
 ## 快速开始
 
-需要 .NET SDK 10.0.404（`global.json` 已锁定，`rollForward: latestFeature`）。
+需要 .NET SDK 10.0.100 或更高（`global.json` 要求 `10.0.100` + `rollForward: latestFeature`，
+即同大版本内任意 feature band 与补丁版本都可用；不跨大版本，避免未来 SDK 改变默认行为后构建突然变红）。
 
 ```bash
 dotnet build src/MemStress/MemStress.csproj
