@@ -22,7 +22,12 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      # fetch-depth: 0 拉全量历史。矩阵门控要用 git diff 比较 base 与 head，
+      # 默认的浅克隆（depth=1）只含一个提交，基线在本地不存在，
+      # 门控会退化成「保守全跑」——优化就永远不生效（实测踩过）。
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # 与 global.json 的 10.0.100 + latestFeature 保持一致：用 .NET 10 的最新补丁，
       # 不钉死某个小版本。钉死会让「本地能构建、CI 找不到该版本」这类问题反复出现。
