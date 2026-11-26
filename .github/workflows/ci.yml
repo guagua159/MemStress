@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-selftest:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # windows-latest 镜像当前已含 .NET SDK 10.0.404，与 global.json 锁定值一致。
+      # 仍显式 setup 一次：镜像滚动时版本会变，显式指定才能保证可复现。
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.404'
+
+      - name: 构建（要求 0 错误 0 警告）
+        run: dotnet build src/MemStress/MemStress.csproj -v q --nologo
+
+      - name: 基础自检
+        run: .\MemStress.exe --selftest --seconds 5 --percent 0.04 --chunk 64
+
+      - name: 报错链路
+        run: .\MemStress.exe --selftest --seconds 5 --percent 0.04 --chunk 64 --inject-error
+
+      - name: 外部工具编排
+        run: .\MemStress.exe --toolselftest
+
+      - name: WHEA 解析链路
+        run: .\MemStress.exe --wheaselftest
+
+      # CI 里没有 tools/ 目录，工具数为 0/N 属正常，该命令恒返回 0
+      - name: 工具发现
+        run: .\MemStress.exe --toolscan
+
+      - name: y-cruncher 日志解析
+        run: .\MemStress.exe --yctailtest
+
+      - name: CSV 转义与日志写失败降级
+        run: .\MemStress.exe --p0test
+
+      - name: 版本号与 CHANGELOG 一致性
+        shell: bash
+        run: |
+          set -u
+          # 只匹配「行首缩进 + <Version>数字」的真正的 XML 节点行，
+          # 避免命中注释里提到的 <Version> 字样
+          CSPROJ_VER=$(grep -oP '^\s*<Version>\K[0-9][^<]*' src/MemStress/MemStress.csproj | head -1)
+          CHANGELOG_VER=$(grep -oP '^## \[\K[0-9]+\.[0-9]+(?=\])' CHANGELOG.md | head -1)
+          echo "csproj=$CSPROJ_VER changelog=$CHANGELOG_VER"
+          if [ -z "$CSPROJ_VER" ] || [ -z "$CHANGELOG_VER" ]; then
+            echo "::error::未能解析出版本号"
+            exit 1
+          fi
+          # csproj 是 1.9.0，CHANGELOG 首节是 1.9，比到次版本号
+          if [ "${CSPROJ_VER%.*}" != "$CHANGELOG_VER" ]; then
+            echo "::error::版本号漂移：csproj=$CSPROJ_VER CHANGELOG=$CHANGELOG_VER"
+            exit 1
+          fi
+
+      # 63 格矩阵约 6 分钟，是检测力回归的主体
+      - name: 63 格故障注入矩阵
+        shell: bash
+        run: bash scripts/matrix-test.sh
+
+      # docx 不入库（决策），因此这里只做静态检查，不比对漂移、也不装 python-docx。
+      # 理由：CI 里为一个文档脚本引入 pip 网络依赖，会让流水线因外部包源波动而红。
+      # 真正的手册校验是本地跑 `python scripts/make-manual.py` 后肉眼确认。
+      # 若将来改为提交 docx，应换成「重生成后 git status --short docs/ 必须为空」。
+      - name: 说明书脚本语法检查
+        run: python -m py_compile scripts/make-manual.py
+
+# 说明：GUI 冒烟（scripts/gui-selftest.ps1）不在 CI 中运行。
+# 托管 runner 以服务身份执行，没有交互桌面，UIA 自动化无法工作。
+# 该脚本仍需在本地改动界面后手动执行——这是显式取舍，不是遗漏。

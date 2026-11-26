@@ -1,0 +1,31 @@
+# 构建产物：exe 与 tools/、logs/ 同级是分发形态，不入库
+/MemStress.exe
+/MemStress.dll
+/MemStress.pdb
+/MemStress.deps.json
+/MemStress.runtimeconfig.json
+
+# 中间产物
+obj/
+bin/
+src/**/obj/
+src/**/bin/
+
+# 运行期产物
+logs/
+
+# 外部工具投放点：第三方二进制一律不入库（红线：不下载、不分发第三方二进制）
+tools/
+
+# 说明书由 scripts/make-manual.py 生成，不入库（决策：仓库只留源码与脚本）
+docs/*.docx
+
+# 编辑器与本地配置
+.vs/
+.idea/
+*.user
+*.suo
+
+# Python 字节码（CI 的 py_compile 步骤会生成）
+__pycache__/
+*.pyc

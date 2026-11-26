@@ -1,0 +1,411 @@
+<Window x:Class="MemStress.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MemStress — 内存压力测试" Height="820" Width="1180"
+        MinHeight="640" MinWidth="980"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Microsoft YaHei UI" FontSize="13"
+        Background="#F5F6F8">
+  <Window.Resources>
+    <Style x:Key="Card" TargetType="Border">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="BorderBrush" Value="#DDE1E6" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="14" />
+      <Setter Property="Margin" Value="0,0,0,10" />
+    </Style>
+    <Style x:Key="H2" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+      <Setter Property="Foreground" Value="#2B3A4A" />
+    </Style>
+    <Style x:Key="MetricLabel" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="#6B7684" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style x:Key="MetricValue" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#1B2733" />
+    </Style>
+  </Window.Resources>
+
+  <DockPanel>
+    <!-- 顶部状态条 -->
+    <Border DockPanel.Dock="Top" Background="#1F2A37" Padding="16,10">
+      <DockPanel>
+        <TextBlock Text="MemStress" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
+        <TextBlock x:Name="HeaderSub" Text="内存压力测试 · 结构化报错日志 · WHEA 监控" Foreground="#9FB3C8"
+                   Margin="12,0,0,0" VerticalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+          <TextBlock x:Name="ElevationText" Foreground="#FFC857" VerticalAlignment="Center" Margin="0,0,12,0" />
+          <Button x:Name="RestartElevatedButton" Content="以管理员重启" Click="RestartElevatedButton_Click"
+                  VerticalAlignment="Center" Margin="0,0,12,0" Padding="8,2" ToolTip="大页需要管理员令牌（SeLockMemoryPrivilege）。点击弹 UAC 并重启本程序。" />
+          <Button x:Name="StartButton" Content="开始测试" Click="StartButton_Click" Background="#2E7D32" Foreground="White"
+                  BorderThickness="0" Padding="18,6" FontWeight="SemiBold" />
+          <Button x:Name="StopButton" Content="停止" Click="StopButton_Click" IsEnabled="False" Padding="18,6" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <!-- 底部状态 -->
+    <StatusBar DockPanel.Dock="Bottom" Background="#ECEFF3">
+      <StatusBarItem>
+        <TextBlock x:Name="StatusText" Text="就绪" />
+      </StatusBarItem>
+      <StatusBarItem HorizontalAlignment="Right">
+        <TextBlock x:Name="LogDirText" Foreground="#4A5568" />
+      </StatusBarItem>
+    </StatusBar>
+
+    <TabControl Margin="10" Background="Transparent" BorderThickness="0">
+      <!-- ========== 压测页 ========== -->
+      <TabItem Header="压测">
+        <Grid Margin="4">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="330" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+
+          <!-- 参数区 -->
+          <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,10,0">
+              <Border Style="{StaticResource Card}">
+                <StackPanel>
+                  <TextBlock Text="测试强度" Style="{StaticResource H2}" />
+                  <TextBlock Text="档位" Style="{StaticResource MetricLabel}" />
+                  <ComboBox x:Name="ProfileBox" SelectedIndex="1" SelectionChanged="ProfileBox_SelectionChanged" Margin="0,2,0,8">
+                    <ComboBoxItem Content="快速筛查 — 2 种模式（移动反转、地址即数据）" />
+                    <ComboBoxItem Content="标准 — 4 种模式（TM5 extreme 同级）" />
+                    <ComboBoxItem Content="深度 — 6 种模式（TM5 absolut 同级，含走 1/棋盘格）" />
+                    <ComboBoxItem Content="彻底 — 7 种模式（含模 20 错位，慢约 4 倍，专查缓存掩盖的错误）" />
+                  </ComboBox>
+
+                  <TextBlock x:Name="MemPercentLabel" Text="内存占用：85% 可用内存" Style="{StaticResource MetricLabel}" />
+                  <Slider x:Name="MemPercentSlider" Minimum="20" Maximum="95" Value="85" TickFrequency="5"
+                          IsSnapToTickEnabled="True" ValueChanged="MemPercentSlider_ValueChanged" Margin="0,2,0,8" />
+
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                      <TextBlock Text="线程数（0=物理核）" Style="{StaticResource MetricLabel}" />
+                      <TextBox x:Name="ThreadsBox" Text="0" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                      <TextBlock Text="块大小 MiB" Style="{StaticResource MetricLabel}" />
+                      <TextBox x:Name="ChunkBox" Text="256" Margin="0,2,0,0" />
+                    </StackPanel>
+                  </Grid>
+
+                  <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                      <TextBlock Text="轮数（0=按时长）" Style="{StaticResource MetricLabel}" />
+                      <TextBox x:Name="PassesBox" Text="1" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                      <TextBlock Text="时长（小时，可填小数）" Style="{StaticResource MetricLabel}" />
+                      <TextBox x:Name="DurationBox" Text="0.5" Margin="0,2,0,0" />
+                    </StackPanel>
+                  </Grid>
+
+                  <CheckBox x:Name="LargePageCheck" Content="优先使用大页（2 MB，需「锁定页面」特权）"
+                            IsChecked="True" Margin="0,10,0,0" />
+                  <CheckBox x:Name="InjectCheck" Content="注入一条测试错误（验证报错链路）" Margin="0,4,0,0" />
+                  <!-- 交叉验证是可选项：默认关闭，因为它会额外花几十分钟到几小时 -->
+                  <CheckBox x:Name="CrossCheckBox" Content="压测结束后追加 y-cruncher 交叉验证（可选）"
+                            Margin="0,10,0,0" />
+                  <StackPanel Orientation="Horizontal" Margin="20,2,0,0">
+                    <TextBlock Text="档位" Style="{StaticResource MetricLabel}" VerticalAlignment="Center" />
+                    <ComboBox x:Name="CrossCheckPresetBox" Width="120" Margin="6,0,0,0" />
+                  </StackPanel>
+                  <TextBlock x:Name="CrossCheckHint" Style="{StaticResource MetricLabel}" TextWrapping="Wrap"
+                             Margin="20,2,0,0" Text="用不同类型的负载再验一遍；耗时较长，默认关闭。" />
+                </StackPanel>
+              </Border>
+
+              <Border Style="{StaticResource Card}">
+                <StackPanel>
+                  <TextBlock Text="运行信息" Style="{StaticResource H2}" />
+                  <TextBlock x:Name="MachineText" Style="{StaticResource MetricLabel}" TextWrapping="Wrap" Text="读取中…" />
+                  <TextBlock x:Name="AllocText" Style="{StaticResource MetricLabel}" TextWrapping="Wrap"
+                             Margin="0,8,0,0" Text="尚未分配" />
+                </StackPanel>
+              </Border>
+
+              <Border Style="{StaticResource Card}">
+                <StackPanel>
+                  <TextBlock Text="测试模式说明" Style="{StaticResource H2}" />
+                  <TextBlock x:Name="PatternText" Style="{StaticResource MetricLabel}" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+            </StackPanel>
+          </ScrollViewer>
+
+          <!-- 实时指标 + 错误 -->
+          <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{StaticResource Card}">
+              <StackPanel>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel Grid.Column="0">
+                    <TextBlock Text="已运行" Style="{StaticResource MetricLabel}" />
+                    <TextBlock x:Name="ElapsedValue" Text="00:00:00" Style="{StaticResource MetricValue}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="吞吐" Style="{StaticResource MetricLabel}" />
+                    <TextBlock x:Name="ThroughputValue" Text="0.00 GiB/s" Style="{StaticResource MetricValue}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="2">
+                    <TextBlock Text="累计读写" Style="{StaticResource MetricLabel}" />
+                    <TextBlock x:Name="BytesValue" Text="0 GiB" Style="{StaticResource MetricValue}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="3">
+                    <TextBlock Text="轮次" Style="{StaticResource MetricLabel}" />
+                    <TextBlock x:Name="PassValue" Text="0" Style="{StaticResource MetricValue}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="4">
+                    <TextBlock Text="错误" Style="{StaticResource MetricLabel}" />
+                    <TextBlock x:Name="ErrorValue" Text="0" Style="{StaticResource MetricValue}" Foreground="#2E7D32" />
+                  </StackPanel>
+                </Grid>
+                <ProgressBar x:Name="Progress" Height="10" Margin="0,12,0,4" />
+                <TextBlock x:Name="ProgressText" Style="{StaticResource MetricLabel}" Text="等待开始" />
+              </StackPanel>
+            </Border>
+
+            <Border x:Name="WheaBanner" Grid.Row="1" Background="#FDECEA" BorderBrush="#E53935" BorderThickness="1"
+                    CornerRadius="6" Padding="12" Margin="0,0,0,10" Visibility="Collapsed">
+              <StackPanel>
+                <TextBlock Text="⚠ 检测到 WHEA 硬件错误事件" FontWeight="Bold" Foreground="#B71C1C" />
+                <TextBlock x:Name="WheaText" Foreground="#7F1D1D" TextWrapping="Wrap" Margin="0,4,0,0" FontSize="12" />
+              </StackPanel>
+            </Border>
+
+            <Border Grid.Row="2" Style="{StaticResource Card}">
+              <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                  <TextBlock Text="错误明细" Style="{StaticResource H2}" Margin="0" VerticalAlignment="Center" />
+                  <Button Content="查看报告" Click="ExportButton_Click" Margin="16,0,0,0" Padding="10,2" />
+                  <Button Content="打开日志目录" Click="OpenLogButton_Click" Padding="10,2" />
+                  <TextBlock x:Name="ErrorHint" Style="{StaticResource MetricLabel}" VerticalAlignment="Center" Margin="12,0,0,0" />
+                </StackPanel>
+                <DataGrid x:Name="ErrorGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal" RowHeaderWidth="0" AlternatingRowBackground="#FAFBFC"
+                          CanUserAddRows="False" FontSize="12">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="时间" Binding="{Binding TimeText}" Width="90" />
+                    <DataGridTextColumn Header="轮" Binding="{Binding Pass}" Width="50" />
+                    <DataGridTextColumn Header="模式" Binding="{Binding Pattern}" Width="130" />
+                    <DataGridTextColumn Header="块" Binding="{Binding BlockIndex}" Width="55" />
+                    <DataGridTextColumn Header="块内偏移" Binding="{Binding OffsetHex}" Width="110" />
+                    <DataGridTextColumn Header="绝对地址" Binding="{Binding AddressHex}" Width="150" />
+                    <DataGridTextColumn Header="期望" Binding="{Binding ExpectedHex}" Width="150" />
+                    <DataGridTextColumn Header="实际" Binding="{Binding ActualHex}" Width="150" />
+                  </DataGrid.Columns>
+                </DataGrid>
+              </DockPanel>
+            </Border>
+          </Grid>
+        </Grid>
+      </TabItem>
+
+      <!-- ========== 报告页 ========== -->
+      <!-- 报告在程序内直接显示，不依赖浏览器：结论、参数、错误明细、WHEA 全在这里。
+           正文是 Markdown 源文，用等宽字体对齐表格，可全选复制后粘到论坛/工单。 -->
+      <TabItem x:Name="ReportTab" Header="报告">
+        <DockPanel Margin="4">
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
+            <Button Content="刷新" Click="SaveReportButton_Click" Padding="10,2" />
+            <Button Content="复制全文" Click="CopyReportButton_Click" Padding="10,2" />
+            <Button Content="打开日志目录" Click="OpenLogButton_Click" Padding="10,2" />
+            <TextBlock Text="报告同时写入会话目录的 report.md，供脚本解析。" Style="{StaticResource MetricLabel}"
+                       VerticalAlignment="Center" Margin="12,0,0,0" />
+          </StackPanel>
+          <TextBox x:Name="ReportBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
+                   HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12"
+                   TextWrapping="NoWrap" Background="#FBFCFD" Foreground="#1B1B1B"
+                   BorderThickness="1" BorderBrush="#D8DEE6" Padding="8" />
+        </DockPanel>
+      </TabItem>
+
+      <!-- ========== 运行日志页 ========== -->
+      <TabItem Header="运行日志">
+        <DockPanel Margin="4">
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
+            <Button Content="清空" Click="ClearLogButton_Click" Padding="10,2" />
+            <Button Content="打开日志目录" Click="OpenLogButton_Click" Padding="10,2" />
+            <TextBlock Text="日志按行写入 errors.csv / errors.jsonl，每条写完立即落盘，断电不丢。" Style="{StaticResource MetricLabel}"
+                       VerticalAlignment="Center" Margin="12,0,0,0" />
+          </StackPanel>
+          <TextBox x:Name="LogBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
+                   HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12"
+                   Background="#1E1E1E" Foreground="#D4D4D4" BorderThickness="0" Padding="8" />
+        </DockPanel>
+      </TabItem>
+
+      <!-- ========== y-cruncher 页 ========== -->
+      <!-- y-cruncher 原生没有 GUI，只有一个控制台窗口。这一页是给它写的前端：
+           档位、内存量、实时迭代进度、通过/失败判定都直接呈现，
+           而不是把控制台输出原样塞进一个滚动框让用户自己找。 -->
+      <TabItem Header="y-cruncher">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="4">
+          <StackPanel>
+
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="这是什么" Style="{StaticResource H2}" />
+                <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap"
+                           Text="y-cruncher 本身没有图形界面，参数要手打命令行、结果要自己翻日志。这一页是它的前端：选档位、看进度、看判定，不用碰命令行。它跑的是非缓存型负载（大数运算 + 大页内存），补的是自研算法测不到的 IMC/缓存层次稳定性。" />
+                <DockPanel Margin="0,8,0,0">
+                  <TextBlock Text="状态" Style="{StaticResource MetricLabel}" VerticalAlignment="Center" />
+                  <TextBlock x:Name="YcStatusText" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center" Text="检测中…" />
+                  <Button Content="打开官网" Click="OpenToolSite_Click" Tag="https://www.numberworld.org/y-cruncher/" Padding="10,2" Margin="16,0,0,0" />
+                  <Button Content="打开工具目录" Click="OpenToolDir_Click" Tag="tools\ycruncher" Padding="10,2" />
+                  <Button Content="指定路径…" Click="BrowseTool_Click" Tag="ycruncher" Padding="10,2" />
+                </DockPanel>
+                <TextBlock x:Name="YcPathText" Style="{StaticResource MetricLabel}" TextWrapping="Wrap" Margin="0,6,0,0" />
+              </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="档位" Style="{StaticResource H2}" />
+                <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap" Margin="0,0,0,8"
+                           Text="选之前就能看到每个档位会跑多久、用哪些算法。深度驻留适合睡前挂着跑。" />
+                <StackPanel Orientation="Horizontal">
+                  <ComboBox x:Name="YcPresetBox" MinWidth="200" Padding="6,2" SelectionChanged="YcPreset_Changed" />
+                </StackPanel>
+                <TextBlock x:Name="YcPresetDetail" Style="{StaticResource MetricLabel}" TextWrapping="Wrap" Margin="0,8,0,0" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                  <TextBlock Text="内存占用" Style="{StaticResource MetricLabel}" VerticalAlignment="Center" />
+                  <TextBlock x:Name="YcMemoryText" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center" />
+                  <TextBlock Text="（y-cruncher 按物理内存总量自动分配，这里是它将要申请的量）"
+                             Style="{StaticResource MetricLabel}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                  <Button x:Name="YcRunButton" Content="▶ 开始测试" Click="YcRun_Click" Padding="16,4" FontWeight="SemiBold" />
+                  <Button x:Name="YcStopButton" Content="停止" Click="YcStop_Click" Padding="16,4" Margin="8,0,0,0" IsEnabled="False" />
+                  <TextBlock Style="{StaticResource MetricLabel}" VerticalAlignment="Center" Margin="14,0,0,0"
+                             Text="停止会清理整棵进程树，不会影响你自己另外启动的 y-cruncher 实例。" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="进度" Style="{StaticResource H2}" />
+                <Grid Margin="0,4,0,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel Grid.Column="0">
+                    <TextBlock Text="迭代" Style="{StaticResource MetricLabel}" />
+                    <TextBlock x:Name="YcIterText" FontSize="18" FontWeight="SemiBold" Text="—" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="当前算法" Style="{StaticResource MetricLabel}" />
+                    <TextBlock x:Name="YcAlgoText" FontSize="18" FontWeight="SemiBold" Text="—" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="2">
+                    <TextBlock Text="已用时间" Style="{StaticResource MetricLabel}" />
+                    <TextBlock x:Name="YcElapsedText" FontSize="18" FontWeight="SemiBold" Text="—" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="3">
+                    <TextBlock Text="预计剩余" Style="{StaticResource MetricLabel}" />
+                    <TextBlock x:Name="YcRemainText" FontSize="18" FontWeight="SemiBold" Text="—" />
+                  </StackPanel>
+                </Grid>
+                <ProgressBar x:Name="YcProgress" Height="6" Margin="0,12,0,0" Minimum="0" Maximum="100" Value="0" />
+              </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="结果" Style="{StaticResource H2}" />
+                <TextBlock x:Name="YcVerdictText" TextWrapping="Wrap" FontSize="15" FontWeight="SemiBold"
+                           Margin="0,4,0,0" Text="尚未运行" />
+                <TextBlock x:Name="YcVerdictDetail" Style="{StaticResource MetricLabel}" TextWrapping="Wrap" Margin="0,6,0,0" />
+              </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="原始输出" Style="{StaticResource H2}" />
+                <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap" Margin="0,0,0,6"
+                           Text="上面已经给了判定，这里只是保留原始输出供排查。完整日志在会话目录里。" />
+                <TextBox x:Name="YcLogBox" IsReadOnly="True" MinHeight="120" MaxHeight="220"
+                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                         FontFamily="Consolas" FontSize="11" Background="#1E1E1E" Foreground="#D4D4D4"
+                         BorderThickness="0" TextWrapping="NoWrap" />
+              </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="为什么本工具不代下载" Style="{StaticResource H2}" />
+                <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap"
+                           Text="y-cruncher 的授权页写明可以免费镜像分发，但同页限定非商业用途、且条款可随时变更——所以本项目不打包，由用户自己从官网取，放到 tools\ycruncher\ 即可。程序自身不下载任何二进制，也不会静默替换你的文件。&#10;&#10;另注：y-cruncher 的 stress 模式不认 -o，标准输出走 WriteConsoleW，直接重定向只能拿到空文件；官方途径是启动选项 logfile:&quot;...&quot;，本工具运行时会自动带上并把该日志归档。" />
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ========== 说明页 ========== -->
+      <TabItem Header="方法与局限">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="4">
+          <StackPanel>
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="判读规则" Style="{StaticResource H2}" />
+                <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap" LineHeight="22"
+                           Text="1. 出现任何一条内存错误 → 不通过。错误集中在同一块同一偏移，优先怀疑该地址对应的颗粒或时序参数。&#10;2. 内存零错误但出现 WHEA-Logger 事件 → 仍判不通过。17 是已纠正的硬件错误（常见于 PCIe Root Port），47 是已纠正的内存/机器检查（Component: Memory），18/46 才是不可纠正版本。纠正不是免费的：本底速率正常、速率爬升即余量在流失。&#10;3. 测试被中止 → 不给结论，只给证据。&#10;4. 全部通过 → 「本次配置下未发现错误」，不等于内存绝对可靠，需交叉验证。" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="已知局限" Style="{StaticResource H2}" />
+                <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap" LineHeight="22"
+                           Text="· 走 1 模式只测每块前 32 MiB（每 8 字节要读写 64 遍），其余模式全量覆盖；采样范围写在报告里，不假装全量。&#10;· 大页不可用时自动回退 4 KB 页，覆盖率下降，界面与报告都会标注。&#10;· 只能测到用户态可分配的物理内存；内核占用、保留区测不到。&#10;· 温度相关的不稳定需要配合 GPU 负载或长时间运行才能复现。&#10;· 本工具不做任何系统设置修改，不需要重启。" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="参考" Style="{StaticResource H2}" />
+                <TextBlock Style="{StaticResource MetricLabel}" TextWrapping="Wrap" LineHeight="22">
+                  TestMem5 官网 testmem5.com；TestMem5 配置结构见 MemTestHelper（integralfx）的 TM5-Configs；
+                  RunMemtestStartup（rictirse）的启动器与 SMBIOS 采集思路；y-cruncher（Mysticial）作为非缓存负载。
+                  详细调研记录（含 21 个来源链接、extreme@anta777 与 absolutnew 的实测参数）见项目 docs/research.md。
+                </TextBlock>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</Window>

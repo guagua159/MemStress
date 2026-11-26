@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>MemStress</AssemblyName>
+    <RootNamespace>MemStress</RootNamespace>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!--
+      app.manifest：requestedExecutionLevel=asInvoker。
+      曾试过 highestAvailable（动机：大页需要 SeLockMemoryPrivilege），实测否决：
+      非提权调用方 CreateProcess 直接 740 拒绝，CLI 自检全挂；UIPI 还会静默丢
+      WM_CLOSE。提权改由 GUI「以管理员重启」按钮显式做，详见 app.manifest 注释。
+    -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!--
+      版本号单一事实源。改版本只改这一处。
+      CHANGELOG 首节标题必须与这里一致（CI 的「版本号与 CHANGELOG 一致性」步骤会校验）。
+      Version 属性同时驱动 AssemblyVersion / FileVersion / ProductVersion（本机实测：
+      -p:Version=9.9.9 → AssemblyVersion=9.9.9.0），而 SystemInfo.cs 读的是
+      AssemblyVersion，所以 session.json 与报告里的版本会自动跟随，无需改代码。
+      注意：1.9 之前 session.json 的 version 恒为 1.0.0.0，不代表真实版本。
+    -->
+    <Version>1.9.0</Version>
+
+    <!--
+      可执行文件直接落到仓库根（E:\MemStress\MemStress.exe），而不是默认的
+      src\MemStress\bin\Debug\net10.0-windows\ 五层目录里。
+      理由：tools\ 投放点和 logs\ 都以程序所在目录为锚点，exe 与它们同级时，
+      整个文件夹就是一个自洽的可分发单元——复制到任何机器上都能直接用。
+    -->
+    <OutputPath>$(MSBuildThisFileDirectory)..\..\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+
+    <!-- 中间产物仍留在项目内，避免 obj 文件混进仓库根 -->
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj\</BaseIntermediateOutputPath>
+
+    <!--
+      发布发布版：dotnet build -c Release（吞吐实测与 Debug 持平略优，20.97 vs 20.76 GiB/s）。
+      ReadyToRun 未默认开。实测数据（2026-11-26，本机）：
+        MemStress.dll 175616 B 增大到 380928 B，即 2.17 倍。
+        help 参数启动中位数 126ms 变成 129ms（5 次，无实质差异）。
+      R2R 的收益是减少 JIT 编译量，但 WPF 应用的启动时间主要在框架初始化，
+      且程序集本身代码量不大（官方文档：代码量少的应用收益不明显）。
+      2.17 倍体积换 3ms，不值得默认开启。
+      要开时用 dotnet publish，加 -c Release -r win-x64 -p:PublishReadyToRun=true 与输出目录。
+    -->
+  </PropertyGroup>
+</Project>
