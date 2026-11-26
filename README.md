@@ -18,17 +18,17 @@ WalkingOnes / Checkerboard / ModuloX），可选 y-cruncher 交叉验证，WHEA 
 ## 快速开始
 
 ```bash
-cd E:\MemStress
+cd MemStress          # 或你克隆到的任意目录
 dotnet build src/MemStress/MemStress.csproj
 ```
 
 构建产物直接落在仓库根，双击即可运行：
 
 ```
-E:\MemStress\MemStress.exe
+MemStress.exe
 ```
 
-exe 与 `tools\`、`logs\` 同级，整个 `E:\MemStress` 文件夹就是自洽的可分发单元——复制到任何机器上都能直接用，`tools\` 投放点跟着走。
+exe 与 `tools\`、`logs\` 同级，整个仓库文件夹就是自洽的可分发单元——复制到任何机器上都能直接用，`tools\` 投放点跟着走。
 
 无界面自检（CI / 验收用）：
 
@@ -227,7 +227,7 @@ MemStress.exe --toolscan
 ## 目录
 
 ```
-E:\MemStress
+MemStress\               （仓库根，克隆后的目录名可自定）
 ├─ MemStress.exe          构建产物直接落在这里，双击即运行
 ├─ MemStress.dll / .deps.json / .runtimeconfig.json
 ├─ src\MemStress\
