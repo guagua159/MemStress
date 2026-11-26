@@ -9,7 +9,6 @@ WalkingOnes / Checkerboard / ModuloX），可选 y-cruncher 交叉验证，WHEA 
 
 **尚未做**：多实例分核、SMBIOS 原始表读取、外部工具自动下载。
 
-> **要改代码或接手维护？** 先看 [MAINTENANCE.md](MAINTENANCE.md)——代码地图、「我要改 X 该动哪个文件」速查、改完必跑的验证命令、踩过的坑。
 > **改完要记一笔？** 按 [CHANGELOG.md](CHANGELOG.md) 的四段式（症状/根因/改法/验证）写。
 
 ## 许可证
@@ -49,7 +48,7 @@ MemStress.exe --wheaselftest
 
 自检退出码：`0` 通过，`2` 失败。
 
-📖 图文说明书：本地运行 `python scripts/make-manual.py` 生成 `docs/MemStress-使用说明书.docx`（12 章，9 页，含参数表、判读规则、FAQ）。成品不随仓库分发。
+📖 图文说明书：见项目发布页（12 章，9 页，含参数表、判读规则、FAQ）。
 
 ## 界面
 

@@ -70,11 +70,3 @@ jobs:
         shell: bash
         run: bash scripts/matrix-test.sh
 
-      # docs/ 为本地工作文档，不入库；这里只验证生成脚本语法正确。
-      # 真正的手册校验是本地跑 `python scripts/make-manual.py` 后肉眼确认。
-      - name: 说明书脚本语法检查
-        run: python -m py_compile scripts/make-manual.py
-
-# 说明：GUI 冒烟（scripts/gui-selftest.ps1）不在 CI 中运行。
-# 托管 runner 以服务身份执行，没有交互桌面，UIA 自动化无法工作。
-# 该脚本仍需在本地改动界面后手动执行——这是显式取舍，不是遗漏。

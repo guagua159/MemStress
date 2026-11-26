@@ -5,7 +5,7 @@ namespace MemStress.Core;
 
 /// <summary>
 /// 模式内核共用的底层写校验原语：整块填充、整块校验、向量块失配后逐字节定位。
-/// 从 StressEngine.Patterns.cs 拆出（该文件涨到 327 行，超过 300 行上限，见 MAINTENANCE.md）。
+/// 从 StressEngine.Patterns.cs 拆出（该文件涨到 327 行，超过 300 行上限）。
 /// 这里的函数全部是纯读写原语，不含任何故障模型语义，改它们要同步考虑所有六个模式。
 /// </summary>
 public sealed unsafe partial class StressEngine

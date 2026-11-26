@@ -2,7 +2,7 @@ namespace MemStress.Core;
 
 /// <summary>
 /// 压测引擎的指标部分：单轮有效覆盖量、轮次、进度。
-/// 拆出来是因为 StressEngine.cs 原本已逼近 300 行上限（见 MAINTENANCE.md「文件规模」），
+/// 拆出来是因为 StressEngine.cs 原本已逼近 300 行上限，
 /// 而这几项全是只读的派生计算，与线程调度无关，改动风险低。
 /// </summary>
 public sealed unsafe partial class StressEngine

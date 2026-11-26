@@ -17,8 +17,18 @@ logs/
 # 外部工具投放点：第三方二进制一律不入库（红线：不下载、不分发第三方二进制）
 tools/
 
-# 说明书由 scripts/make-manual.py 生成，不入库（决策：仓库只留源码与脚本）
+# 说明书由本地脚本生成，不入库
 docs/*.docx
+
+# 内部工作文档与个人开发工具，只留在本机，不随公开仓库分发
+AGENTS.md
+src/MemStress/AGENTS.md
+src/MemStress/Core/AGENTS.md
+MAINTENANCE.md
+scripts/gui-smoke.ps1
+scripts/gui-act.ps1
+scripts/gui-selftest.ps1
+scripts/make-manual.py
 
 # docs/ 全部为本地内部文档（交接、审计、调研记录、截图、方案），不入库。
 # 公开仓库只放源码、脚本与 README/CHANGELOG/MAINTENANCE。

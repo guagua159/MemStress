@@ -5,7 +5,7 @@ namespace MemStress.Core;
 
 /// <summary>
 /// 「走 1」模式族：WalkingOnes 及其链式遍历原语。
-/// 从 StressEngine.Patterns.cs 拆出（该文件涨到 350 行，超过 300 行上限，见 MAINTENANCE.md）。
+/// 从 StressEngine.Patterns.cs 拆出（该文件涨到 350 行，超过 300 行上限）。
 /// 职责边界：这里只处理「8 个位位置轮流置位」这一种故障模型，不涉及其他模式。
 /// </summary>
 public sealed unsafe partial class StressEngine
