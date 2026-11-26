@@ -25,13 +25,14 @@ AGENTS.md
 src/MemStress/AGENTS.md
 src/MemStress/Core/AGENTS.md
 MAINTENANCE.md
+CHANGELOG.md
 scripts/gui-smoke.ps1
 scripts/gui-act.ps1
 scripts/gui-selftest.ps1
 scripts/make-manual.py
 
 # docs/ 全部为本地内部文档（交接、审计、调研记录、截图、方案），不入库。
-# 公开仓库只放源码、脚本与 README/CHANGELOG/MAINTENANCE。
+# 公开仓库只放源码、脚本与 README。
 docs/
 
 # 编辑器与本地配置
