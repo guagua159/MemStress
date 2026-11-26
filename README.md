@@ -16,13 +16,51 @@
 
 ## 安装
 
+### 方式一：下载发行版（推荐）
+
+从 [Releases](https://github.com/guagua159/MemStress/releases) 下载 `MemStress-1.9-win-x64.zip`，
+解压到任意目录，双击 `MemStress.exe` 即可运行。不需要安装 .NET SDK，也不需要编译。
+
+**运行前必须安装 .NET 10 桌面运行时**（.NET Desktop Runtime 10.0）。
+
+未安装时双击会提示 `You must install .NET to run this application.`
+
+下载地址（微软官方）：https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+
+在该页面「Run desktop apps」一节下载 **.NET Desktop Runtime** 的 x64 安装包并安装。
+
+注意两点：
+
+- 只装「.NET Runtime」不够，那是给控制台程序用的。本程序是图形界面程序，需要 **Desktop Runtime**。
+- 版本必须是 **10.x**。装 8.x 或 9.x 都不能运行本程序。
+
+确认是否已安装，打开命令提示符执行：
+
+```
+dotnet --list-runtimes
+```
+
+输出中应包含 `Microsoft.WindowsDesktop.App 10.x.x` 这一行。
+
+### 方式二：从源码构建
+
 需要 .NET SDK 10.0.100 或更高版本。
 
 ```bash
 dotnet build src/MemStress/MemStress.csproj
 ```
 
-构建产物落在仓库根目录，双击 `MemStress.exe` 即可运行。
+构建产物落在仓库根目录，双击 `MemStress.exe` 即可运行。此方式不需要单独安装桌面运行时——
+SDK 已包含运行时。
+
+### 开启大页（可选，需管理员）
+
+无论用哪种方式安装，都建议以管理员身份运行，这样才能使用大页（2 MB），覆盖率更高。
+非管理员运行会自动回退到 4 KB 页，界面与报告都会标注实际使用的分配方式。
+
+```
+secpol.msc → 本地策略 → 用户权限分配 → 锁定页面 → 添加当前用户 → 重新登录
+```
 
 ## 使用
 
@@ -33,15 +71,6 @@ dotnet build src/MemStress/MemStress.csproj
 3. 点「开始测试」
 
 测试期间界面实时显示时长、吞吐、累计读写量、轮次与错误数。发现的错误列在下方的错误表格里。
-
-建议以管理员身份运行，这样才能使用大页（2 MB），覆盖率更高。非管理员会自动回退到 4 KB 页，
-界面与报告都会标注实际使用的分配方式。
-
-### 开启大页（可选，需管理员）
-
-```
-secpol.msc → 本地策略 → 用户权限分配 → 锁定页面 → 添加当前用户 → 重新登录
-```
 
 ### 档位选择
 
