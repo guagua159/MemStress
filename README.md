@@ -230,7 +230,7 @@ MemStress.exe --wheaselftest
 MemStress.exe --yctailtest
 MemStress.exe --p0test
 
-# 63 格故障注入矩阵（约 6 分钟）
+# 63 格故障注入矩阵（约 2.3 分钟）
 bash scripts/matrix-test.sh
 ```
 

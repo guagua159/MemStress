@@ -38,7 +38,9 @@ public static partial class SelfTest
         };
 
         Console.WriteLine($"[selftest] 参数: {opt.Describe()}");
-        var info = SystemInfo.Collect();
+        // 矩阵回归用：跳过 WMI 机器信息采集。4 次 PowerShell 查询本机实测约 2.1 秒，
+        // 63 格就是 2 分钟白等，而矩阵只关心「这一格能否检出注入的错误」，不关心机器型号。
+        var info = SystemInfo.Collect(skipSlow: args.Contains("--skip-sysinfo"));
         Console.WriteLine($"[selftest] 机器: {info["cpu"]} / {info["mainboard"]} / 物理核 {info["physicalCores"]} / 可用 {info["availablePhysicalMiB"]} MiB");
 
         using var log = new LogWriter(AppPaths.LogsRoot, "selftest");

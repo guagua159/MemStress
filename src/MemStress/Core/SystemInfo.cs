@@ -21,7 +21,17 @@ public static class SystemInfo
         public string PartNumber { get; set; } = "";
     }
 
-    public static JsonObject Collect()
+    /// <summary>
+    /// 采集机器信息。
+    /// <para>
+    /// <paramref name="skipSlow"/> 为 true 时跳过 4 次 PowerShell/WMI 查询（CPU 型号、主板、BIOS、内存条），
+    /// 只保留 BCL 与 Win32 能直接拿到的字段。这 4 次查询本机实测约 2.1 秒，占了
+    /// `--selftest` 单次运行的 40%——63 格故障注入矩阵因此白花 2 分钟。
+    /// 矩阵只关心「这一格能否检出注入的错误」，不关心机器型号，所以可以跳过。
+    /// 代价是报告里的 cpu/mainboard/bios/memoryModules 为空，因此只在明确知道不需要时传 true。
+    /// </para>
+    /// </summary>
+    public static JsonObject Collect(bool skipSlow = false)
     {
         var o = new JsonObject
         {
@@ -41,6 +51,14 @@ public static class SystemInfo
             ["isElevated"] = IsElevated(),
             ["is64BitProcess"] = Environment.Is64BitProcess
         };
+
+        if (skipSlow)
+        {
+            // 只保留 BCL / Win32 能直接拿到的字段。cpu 与 memoryModules 留空，
+            // 报告里会显示为未知——矩阵测试不读这两个字段。
+            o["memoryModules"] = new JsonArray();
+            return o;
+        }
 
         var cpu = Query("Get-CimInstance Win32_Processor | Select-Object -First 1 Name,NumberOfCores,NumberOfLogicalProcessors,MaxClockSpeed");
         if (cpu != null)
