@@ -75,8 +75,14 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          # tag 名形如 v1.9 / v1.9.1 / v2.0，去掉 v 前缀并补足三段
+          # tag 名形如 v1.9 / v1.9.1 / v2.0，去掉 v 前缀并补足三段。
+          # 先校验格式：不校验的话 v2.0-test 这类 tag 会算出 "2.0-test.0"
+          # 这种无意义期望值，报错信息也就失去指向性。
           $tag = $env:GITHUB_REF_NAME -replace '^v', ''
+          if ($tag -notmatch '^\d+\.\d+(\.\d+)?$') {
+            Write-Output "::error::tag 名「$($env:GITHUB_REF_NAME)」不是 vX.Y 或 vX.Y.Z 形式，无法与产物版本比对。"
+            exit 1
+          }
           $parts = @($tag -split '\.')
           while ($parts.Count -lt 3) { $parts += '0' }
           $expected = ($parts[0..2] -join '.')
