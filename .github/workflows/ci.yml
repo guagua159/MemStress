@@ -3,6 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+    # 推 v* tag 时跑一次：校验「发布出去的二进制版本 == tag」。
+    # 这是唯一真正需要版本一致性的时刻，日常提交不必为此设检查。
+    tags: ['v*']
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -62,26 +65,34 @@ jobs:
       - name: CSV 转义与日志写失败降级
         run: .\MemStress.exe --p0test
 
-      # CHANGELOG 不随仓库分发（只留在作者本机），所以版本一致性改为校验
-      # csproj 与 README 里公开声明的版本号——这是外部读者唯一能看到的版本信息。
-      - name: 版本号与 README 一致性
-        shell: bash
+      # 版本号只在 csproj 里存在一份，README 不再重复写死（原先靠 grep 比对
+      # README 的「当前版本 X.Y」，那要求发版时手工同步两处文本，漏一处就红；
+      # 而 README 里的 zip 文件名同样写死版本却无人校验，会静默过期）。
+      # 真正要守的不变量是：发布出去的二进制版本 == 打的 tag。
+      # 这条只在推 tag 时校验一次，日常提交不受影响。
+      - name: 发布版本与 tag 一致
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
         run: |
-          set -u
-          # 只匹配「行首缩进 + <Version>数字」的真正的 XML 节点行，
-          # 避免命中注释里提到的 <Version> 字样
-          CSPROJ_VER=$(grep -oP '^\s*<Version>\K[0-9][^<]*' src/MemStress/MemStress.csproj | head -1)
-          README_VER=$(grep -oP '当前版本 \K[0-9]+\.[0-9]+' README.md | head -1)
-          echo "csproj=$CSPROJ_VER readme=$README_VER"
-          if [ -z "$CSPROJ_VER" ] || [ -z "$README_VER" ]; then
-            echo "::error::未能解析出版本号"
+          $ErrorActionPreference = 'Stop'
+          # tag 名形如 v1.9 / v1.9.1 / v2.0，去掉 v 前缀并补足三段
+          $tag = $env:GITHUB_REF_NAME -replace '^v', ''
+          $parts = @($tag -split '\.')
+          while ($parts.Count -lt 3) { $parts += '0' }
+          $expected = ($parts[0..2] -join '.')
+
+          # 从产物本身读，而不是解析 csproj 文本：csproj 是 MSBuild 的输入，
+          # 写法一变（加 Condition、改用 Directory.Build.props）正则就失配，
+          # 而构建依然正常——那种检查只会制造误报。
+          $vi = (Get-Item ./MemStress.exe).VersionInfo
+          $actual = "$($vi.FileMajorPart).$($vi.FileMinorPart).$($vi.FileBuildPart)"
+
+          Write-Output "tag=$($env:GITHUB_REF_NAME) 期望=$expected 产物=$actual"
+          if ($expected -ne $actual) {
+            Write-Output "::error::版本漂移：tag 是 $($env:GITHUB_REF_NAME)，但构建出的 MemStress.exe 是 $actual。发布前请先改 src/MemStress/MemStress.csproj 的 <Version>。"
             exit 1
-          fi
-          # csproj 是 1.9.0，README 是 1.9，比到次版本号
-          if [ "${CSPROJ_VER%.*}" != "$README_VER" ]; then
-            echo "::error::版本号漂移：csproj=$CSPROJ_VER README=$README_VER"
-            exit 1
-          fi
+          }
+          Write-Output "版本一致"
 
       # 矩阵校验的是「7 种模式 × 9 种故障能否检出」——检测力的回归，约 2.3 分钟。
       # 只在可能改变这个结论的改动上跑；文档、界面、外部工具、报告排版跑它没有信息量。

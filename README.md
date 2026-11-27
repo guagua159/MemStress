@@ -2,7 +2,8 @@
 
 用 .NET 10 + WPF 实现的内存压力测试工具，带图形界面与结构化报错日志。
 
-**当前版本 1.9**，零 NuGet 依赖，MIT 许可。
+[![release](https://img.shields.io/github/v/release/guagua159/MemStress)](https://github.com/guagua159/MemStress/releases/latest)
+零 NuGet 依赖，MIT 许可。
 
 ## 它做什么
 
@@ -18,7 +19,7 @@
 
 ### 方式一：下载发行版（推荐）
 
-从 [Releases](https://github.com/guagua159/MemStress/releases) 下载 `MemStress-1.9-win-x64.zip`，
+从 [Releases](https://github.com/guagua159/MemStress/releases/latest) 下载最新的 `MemStress-*-win-x64.zip`，
 解压到任意目录，双击 `MemStress.exe` 即可运行。不需要安装 .NET SDK，也不需要编译。
 
 **运行前必须安装 .NET 10 桌面运行时**（.NET Desktop Runtime 10.0）。
