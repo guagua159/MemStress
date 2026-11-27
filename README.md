@@ -44,7 +44,7 @@ dotnet --list-runtimes
 
 ### 方式二：从源码构建
 
-需要 .NET SDK 10.0.100 或更高版本。
+需要 .NET SDK **10.x**（10.0.100 或更高版本）。
 
 ```bash
 dotnet build src/MemStress/MemStress.csproj

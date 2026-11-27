@@ -31,9 +31,11 @@ jobs:
 
       # 与 global.json 的 10.0.100 + latestFeature 保持一致：用 .NET 10 的最新补丁，
       # 不钉死某个小版本。钉死会让「本地能构建、CI 找不到该版本」这类问题反复出现。
+      # '10.x' 与 '10.0.x' 在 setup-dotnet 里等价：两者都解析成 channel 10.0
+      # （createChannelArgument → channelForMajor('10') 返回 '10.0'）。
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '10.x'
 
       - name: 构建（要求 0 错误 0 警告）
         run: dotnet build src/MemStress/MemStress.csproj -v q --nologo
